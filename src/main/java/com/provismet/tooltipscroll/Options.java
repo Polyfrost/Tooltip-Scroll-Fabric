@@ -1,15 +1,18 @@
 package com.provismet.tooltipscroll;
 
-import com.provismet.lilylib.util.json.JsonConfig;
-import com.provismet.lilylib.util.json.JsonReader;
+import com.provismet.tooltipscroll.config.OSLTooltipConfig;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.util.Mth;
+import net.ornithemc.osl.config.api.serdes.SerializationSettings;
+import net.ornithemc.osl.config.api.serdes.config.ConfigSerializer;
+import net.ornithemc.osl.config.api.serdes.config.ConfigSerializers;
+import net.ornithemc.osl.core.api.json.JsonFile;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public abstract class Options {
+
     private static final Path FILE = FabricLoader.getInstance().getConfigDir().resolve("tooltipscroll.json");
 
     public static boolean canScroll = true;
@@ -21,38 +24,59 @@ public abstract class Options {
     public static boolean invertYScroll = false;
     public static boolean matrixMode = false;
 
-    private static final JsonConfig SERIALISER = new JsonConfig()
-        .addBoolean("canScroll", () -> canScroll, val -> canScroll = val)
-        .addBoolean("useWASD", () -> useWASD, val -> useWASD = val)
-        .addBoolean("startOnTop", () -> startOnTop, val -> startOnTop = val)
-        .addBoolean("resetOnUnlock", () -> resetOnUnlock, val -> resetOnUnlock = val)
-        .addBoolean("useLShift", () -> useLShift, val -> useLShift = val)
-        .addBoolean("invertXScroll", () -> invertXScroll, val -> invertXScroll = val)
-        .addBoolean("invertYScroll", () -> invertYScroll, val -> invertYScroll = val)
-        .addInteger("scrollSpeed", () -> ScrollTracker.scrollSize, val -> ScrollTracker.scrollSize = Math.max(1, val))
-        .addInteger("keyboardScrollSpeed", () -> ScrollTracker.scrollSizeKeyboard, val -> ScrollTracker.scrollSizeKeyboard = Math.max(1, val))
-        .addDouble("scrollSmoothness", () -> ScrollTracker.smoothnessModifier, val -> ScrollTracker.smoothnessModifier = Mth.clamp(val, 0.05, 1.0))
-        .addBoolean("matrixCompatibilityMode", () -> matrixMode, val -> matrixMode = val);
+    public static void saveJSON() {
+        OSLTooltipConfig config = OSLTooltipConfig.INSTANCE;
+        config.canScroll.set(canScroll);
+        config.useWASD.set(useWASD);
+        config.startOnTop.set(startOnTop);
+        config.resetOnUnlock.set(resetOnUnlock);
+        config.useLShift.set(useLShift);
+        config.invertXScroll.set(invertXScroll);
+        config.invertYScroll.set(invertYScroll);
+        config.matrixCompatibilityMode.set(matrixMode);
+        config.scrollSpeed.set(ScrollTracker.scrollSize);
+        config.keyboardScrollSpeed.set(ScrollTracker.scrollSizeKeyboard);
+        config.scrollSmoothness.set(ScrollTracker.smoothnessModifier);
 
-    public static void saveJSON () {
         try {
-            SERIALISER.saveToFile(FILE);
+            ConfigSerializer<JsonFile> serializer = ConfigSerializers.get(OSLTooltipConfig.SERIALIZER_TYPE);
+            serializer.serialize(config, SerializationSettings.forFile(), OSLTooltipConfig.SERIALIZER_TYPE.open(FILE));
         }
         catch (IOException e) {
             TooltipScrollClient.LOGGER.error("Encountered error whilst trying to save config JSON.", e);
         }
     }
 
-    public static void readJSON () {
-        try {
-            JsonReader reader = JsonReader.file(FILE);
-            if (reader != null) {
-                SERIALISER.loadFromJson(reader);
+    public static void readJSON() {
+        OSLTooltipConfig config = OSLTooltipConfig.INSTANCE;
+        config.load();
+        config.resetAll();
+
+        if (Files.exists(FILE)) {
+            try {
+                ConfigSerializer<JsonFile> serializer = ConfigSerializers.get(OSLTooltipConfig.SERIALIZER_TYPE);
+                serializer.deserialize(config, SerializationSettings.forFile(), OSLTooltipConfig.SERIALIZER_TYPE.open(FILE));
+            }
+            catch (IOException e) {
+                TooltipScrollClient.LOGGER.error("Encountered error whilst trying to read config JSON.", e);
             }
         }
-        catch (FileNotFoundException e) {
+        else {
             TooltipScrollClient.LOGGER.info("Failed to find TooltipScroll config, constructing default.");
         }
+
+        canScroll = config.canScroll.get();
+        useWASD = config.useWASD.get();
+        startOnTop = config.startOnTop.get();
+        resetOnUnlock = config.resetOnUnlock.get();
+        useLShift = config.useLShift.get();
+        invertXScroll = config.invertXScroll.get();
+        invertYScroll = config.invertYScroll.get();
+        matrixMode = config.matrixCompatibilityMode.get();
+        ScrollTracker.scrollSize = Math.max(1, config.scrollSpeed.get());
+        ScrollTracker.scrollSizeKeyboard = Math.max(1, config.keyboardScrollSpeed.get());
+        ScrollTracker.smoothnessModifier = Math.clamp(config.scrollSmoothness.get(), 0.05, 1.0);
+
         saveJSON();
     }
 }

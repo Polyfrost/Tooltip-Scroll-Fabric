@@ -1,1 +1,1 @@
-Adjusted metadata to allow the mod to run on 26.1 and 26.2
+1.8.9 Orinthe support

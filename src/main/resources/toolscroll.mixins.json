@@ -6,11 +6,9 @@
   "mixins": [
   ],
   "client": [
-    "GuiGraphicsExtractorMixin",
+    "ScreenMixin",
     "MouseMixin",
-    "KeyBindAccessor",
-    "OrderedTextTooltipComponentAccessor",
-    "ScreenMixin"
+    "MinecraftMixin"
   ],
   "injectors": {
     "defaultRequire": 1

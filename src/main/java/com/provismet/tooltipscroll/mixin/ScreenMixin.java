@@ -1,19 +1,63 @@
 package com.provismet.tooltipscroll.mixin;
 
+import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
+import com.provismet.tooltipscroll.Options;
+import com.provismet.tooltipscroll.ScrollTracker;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.render.platform.GlStateManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.provismet.tooltipscroll.ScrollTracker;
-import net.minecraft.client.gui.screens.Screen;
+import java.util.List;
 
-// As of 1.20, tooltip logic has been separated from screen logic.
-@Mixin(Screen.class)
+@Mixin(value = Screen.class)
 public abstract class ScreenMixin {
-    // Reset the tracker whenever a GUI window closes.
-	@Inject (method = "onClose", at = @At("HEAD"))
-	public void resetTrackerOnScreenClose (CallbackInfo info) {
-		ScrollTracker.reset();
-	}
+
+    @Inject(method = "renderTooltip(Ljava/util/List;II)V", at = @At("HEAD"))
+    private void tooltipscroll$applyTracker(List<String> text, int mouseX, int mouseY, CallbackInfo ci) {
+        ScrollTracker.unlock();
+        ScrollTracker.update();
+        ScrollTracker.setItem(text);
+    }
+
+    @Inject(
+            method = "renderTooltip(Ljava/util/List;II)V",
+            at = @At(value = "CONSTANT", args = "intValue=-267386864")
+    )
+    private void tooltipscroll$editXY(
+            List<String> text, int mouseX, int mouseY, CallbackInfo ci,
+            @Local(ordinal = 3) LocalIntRef effectiveX,
+            @Local(ordinal = 4) LocalIntRef effectiveY
+    ) {
+        if (Options.matrixMode) return;
+
+        effectiveX.set(effectiveX.get() + ScrollTracker.getXOffset());
+        effectiveY.set(effectiveY.get() + ScrollTracker.getYOffset());
+
+        if (Options.startOnTop && !ScrollTracker.hasMoved()) {
+            int originalY = effectiveY.get();
+            if (effectiveY.get() < 4) {
+                effectiveY.set(4);
+                ScrollTracker.setInitialYOffset(4 - originalY);
+            }
+        }
+    }
+
+    @Inject(method = "renderTooltip(Ljava/util/List;II)V", at = @At("HEAD"))
+    private void tooltipscroll$headMatrices(List<String> text, int mouseX, int mouseY, CallbackInfo ci) {
+        if (!Options.matrixMode) return;
+
+        GlStateManager.pushMatrix();
+        GlStateManager.translated(ScrollTracker.getXOffset(), ScrollTracker.getYOffset(), 0.0F);
+    }
+
+    @Inject(method = "renderTooltip(Ljava/util/List;II)V", at = @At("RETURN"))
+    private void tooltipscroll$tailMatrices(List<String> text, int mouseX, int mouseY, CallbackInfo ci) {
+        if (!Options.matrixMode) return;
+
+        GlStateManager.popMatrix();
+    }
 }

@@ -1,34 +1,7 @@
-# gradle
-
 .gradle/
 build/
-out/
-classes/
-
-# eclipse
-
-*.launch
-
-# idea
-
-.idea/
-*.iml
-*.ipr
-*.iws
-
-# vscode
-
-.settings/
-.vscode/
-bin/
-.classpath
-.project
-.metals/
-
-# macos
-
-*.DS_Store
-
-# fabric
-
 run/
+.idea/
+.kotlin/
+*.iml
+.DS_Store
