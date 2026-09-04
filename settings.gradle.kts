@@ -5,4 +5,4 @@ pluginManagement.repositories {
     mavenCentral()
 }
 
-rootProject.name = "Tooltip-Scroll-Orinthe"
+rootProject.name = "Tooltip-Scroll-Ornithe"
