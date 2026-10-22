@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.lwjgl.input.Keyboard;
+import org.lwjgl.input.Mouse;
 
 public class ScrollTracker {
     // render functions are called every frame, so the offset needs to be saved somewhere
@@ -14,6 +15,8 @@ public class ScrollTracker {
     private static double trueYOffset = 0;
 
     private static boolean moved = false;
+
+    private static boolean wheelConsumed = false;
 
     // save the currently selected item's tooltip lines; scroll resets if the user hovers over a different item
     private static List<String> currentItem;
@@ -172,6 +175,27 @@ public class ScrollTracker {
             resetScroll();
         }
         unlockTime = System.currentTimeMillis();
+    }
+
+    public static void consumeWheel() {
+        wheelConsumed = true;
+    }
+
+    public static void handleScreenMouse(Runnable handleMouse) {
+        wheelConsumed = false;
+        handleMouse.run();
+
+        int wheel = Mouse.getEventDWheel();
+        if (wheel == 0 || wheelConsumed || !Options.canScroll) return;
+
+        if (Options.useLShift && Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
+            if (wheel > 0 != Options.invertXScroll) scrollLeft();
+            else scrollRight();
+        }
+        else {
+            if (wheel > 0 != Options.invertYScroll) scrollUp();
+            else scrollDown();
+        }
     }
 
     public static boolean hasMoved() {
