@@ -24,49 +24,45 @@ public class ScrollTracker {
     private static long unlockTime = System.currentTimeMillis();
     private static final long RELOCK_AT = 100;
 
-    public static int scrollSize = 10;
-    public static int scrollSizeKeyboard = 5;
-    public static double smoothnessModifier = 0.25;
-
     public static void update() {
-        currentXOffset += (trueXOffset - currentXOffset) * smoothnessModifier;
-        currentYOffset += (trueYOffset - currentYOffset) * smoothnessModifier;
+        currentXOffset += (trueXOffset - currentXOffset) * Options.smoothness();
+        currentYOffset += (trueYOffset - currentYOffset) * Options.smoothness();
 
         int up = (TooltipScrollKeybinds.moveUp).getKeyCode();
         int down = (TooltipScrollKeybinds.moveDown).getKeyCode();
         int horizontal = (TooltipScrollKeybinds.horizontal).getKeyCode();
         int reset = (TooltipScrollKeybinds.reset).getKeyCode();
 
-        if (Options.useWASD) {
+        if (Options.useWASD()) {
             if (Keyboard.isKeyDown(Keyboard.KEY_W)) {
-                ScrollTracker.scrollUp(scrollSizeKeyboard);
+                ScrollTracker.scrollUp(Options.keyboardScrollSpeed());
             }
             else if (Keyboard.isKeyDown(Keyboard.KEY_S)) {
-                ScrollTracker.scrollDown(scrollSizeKeyboard);
+                ScrollTracker.scrollDown(Options.keyboardScrollSpeed());
             }
 
             if (Keyboard.isKeyDown(Keyboard.KEY_A)) {
-                ScrollTracker.scrollLeft(scrollSizeKeyboard);
+                ScrollTracker.scrollLeft(Options.keyboardScrollSpeed());
             }
             else if (Keyboard.isKeyDown(Keyboard.KEY_D)) {
-                ScrollTracker.scrollRight(scrollSizeKeyboard);
+                ScrollTracker.scrollRight(Options.keyboardScrollSpeed());
             }
         }
 
         if (Keyboard.isKeyDown(up)) {
-            if ((Keyboard.isKeyDown(horizontal)) || (Options.useLShift && Keyboard.isKeyDown(Keyboard.KEY_LSHIFT))) {
-                ScrollTracker.scrollLeft(scrollSizeKeyboard);
+            if ((Keyboard.isKeyDown(horizontal)) || (Options.useLShift() && Keyboard.isKeyDown(Keyboard.KEY_LSHIFT))) {
+                ScrollTracker.scrollLeft(Options.keyboardScrollSpeed());
             }
             else {
-                ScrollTracker.scrollUp(scrollSizeKeyboard);
+                ScrollTracker.scrollUp(Options.keyboardScrollSpeed());
             }
         }
         else if (Keyboard.isKeyDown(down)) {
-            if ((Keyboard.isKeyDown(horizontal)) || (Options.useLShift && Keyboard.isKeyDown(Keyboard.KEY_LSHIFT))) {
-                ScrollTracker.scrollRight(scrollSizeKeyboard);
+            if ((Keyboard.isKeyDown(horizontal)) || (Options.useLShift() && Keyboard.isKeyDown(Keyboard.KEY_LSHIFT))) {
+                ScrollTracker.scrollRight(Options.keyboardScrollSpeed());
             }
             else {
-                ScrollTracker.scrollDown(scrollSizeKeyboard);
+                ScrollTracker.scrollDown(Options.keyboardScrollSpeed());
             }
         }
         else if (Keyboard.isKeyDown(reset)) {
@@ -90,7 +86,7 @@ public class ScrollTracker {
     }
 
     public static void scrollUp() {
-        scrollUp(scrollSize);
+        scrollUp(Options.scrollSpeed());
         moved = true;
     }
 
@@ -100,7 +96,7 @@ public class ScrollTracker {
     }
 
     public static void scrollDown() {
-        scrollDown(scrollSize);
+        scrollDown(Options.scrollSpeed());
         moved = true;
     }
 
@@ -110,7 +106,7 @@ public class ScrollTracker {
     }
 
     public static void scrollLeft() {
-        scrollLeft(scrollSize);
+        scrollLeft(Options.scrollSpeed());
         moved = true;
     }
 
@@ -120,7 +116,7 @@ public class ScrollTracker {
     }
 
     public static void scrollRight() {
-        scrollRight(scrollSize);
+        scrollRight(Options.scrollSpeed());
         moved = true;
     }
 
@@ -171,7 +167,7 @@ public class ScrollTracker {
     }
 
     public static void unlock() {
-        if (Options.resetOnUnlock && isLocked()) {
+        if (Options.resetOnUnlock() && isLocked()) {
             resetScroll();
         }
         unlockTime = System.currentTimeMillis();
@@ -186,14 +182,15 @@ public class ScrollTracker {
         handleMouse.run();
 
         int wheel = Mouse.getEventDWheel();
-        if (wheel == 0 || wheelConsumed || !Options.canScroll) return;
+        if (wheel == 0 || wheelConsumed || !Options.canScroll()) return;
 
-        if (Options.useLShift && Keyboard.isKeyDown(Keyboard.KEY_LSHIFT)) {
-            if (wheel > 0 != Options.invertXScroll) scrollLeft();
+        int horizontal = TooltipScrollKeybinds.horizontal.getKeyCode();
+        if (Keyboard.isKeyDown(horizontal) || (Options.useLShift() && Keyboard.isKeyDown(Keyboard.KEY_LSHIFT))) {
+            if (wheel > 0 != Options.invertXScroll()) scrollLeft();
             else scrollRight();
         }
         else {
-            if (wheel > 0 != Options.invertYScroll) scrollUp();
+            if (wheel > 0 != Options.invertYScroll()) scrollUp();
             else scrollDown();
         }
     }

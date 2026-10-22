@@ -19,11 +19,8 @@
 
   "environment": "client",
   "entrypoints": {
-    "client": [
+    "client-init": [
       "com.provismet.tooltipscroll.TooltipScrollClient"
-    ],
-    "modmenu": [
-      "com.provismet.tooltipscroll.config.TooltipScrollModMenu"
     ]
   },
   "mixins": [

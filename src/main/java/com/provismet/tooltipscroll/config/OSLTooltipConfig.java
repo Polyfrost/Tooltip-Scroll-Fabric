@@ -6,11 +6,15 @@ import net.ornithemc.osl.config.api.config.BaseConfig;
 import net.ornithemc.osl.config.api.config.option.BooleanOption;
 import net.ornithemc.osl.config.api.config.option.DoubleOption;
 import net.ornithemc.osl.config.api.config.option.IntegerOption;
+import net.ornithemc.osl.config.api.config.option.Option;
 import net.ornithemc.osl.config.api.config.option.validator.IntegerValidators;
 import net.ornithemc.osl.config.api.serdes.FileSerializerType;
 import net.ornithemc.osl.config.api.serdes.SerializerTypes;
 import net.ornithemc.osl.config.api.serdes.config.ConfigSerializers;
 import net.ornithemc.osl.core.api.json.JsonFile;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class OSLTooltipConfig extends BaseConfig {
 
@@ -20,23 +24,33 @@ public class OSLTooltipConfig extends BaseConfig {
 
     static {
         ConfigSerializers.register(SERIALIZER_TYPE, new FlatJsonConfigSerializer());
-        INSTANCE.init();
     }
 
-    public final BooleanOption canScroll = new BooleanOption("canScroll", "entrytooltip.tooltipscroll.canscroll", true);
-    public final BooleanOption useWASD = new BooleanOption("useWASD", "entrytooltip.tooltipscroll.usewasd", false);
-    public final BooleanOption startOnTop = new BooleanOption("startOnTop", "entrytooltip.tooltipscroll.startontop", false);
-    public final BooleanOption resetOnUnlock = new BooleanOption("resetOnUnlock", "entrytooltip.tooltipscroll.resetonunlock", true);
-    public final BooleanOption useLShift = new BooleanOption("useLShift", "entrytooltip.tooltipscroll.uselshift", true);
-    public final BooleanOption invertXScroll = new BooleanOption("invertXScroll", "entrytooltip.tooltipscroll.invertxscroll", false);
-    public final BooleanOption invertYScroll = new BooleanOption("invertYScroll", "entrytooltip.tooltipscroll.invertyscroll", false);
-    public final BooleanOption matrixCompatibilityMode = new BooleanOption("matrixCompatibilityMode", "entrytooltip.tooltipscroll.matrix_compatibility", false);
+    private final Map<Option, String> jsonKeys = new HashMap<>();
 
-    public final IntegerOption scrollSpeed = new IntegerOption("scrollSpeed", "entrytooltip.tooltipscroll.scrollspeed", 10, IntegerValidators.min(1));
-    public final IntegerOption keyboardScrollSpeed = new IntegerOption("keyboardScrollSpeed", "entrytooltip.tooltipscroll.scrollspeedkeys", 5, IntegerValidators.min(1));
-    public final DoubleOption scrollSmoothness = new DoubleOption("scrollSmoothness", "entrytooltip.tooltipscroll.smoothness", 0.25, value -> value >= 0.05 && value <= 1.0);
+    public final BooleanOption canScroll = option("canScroll", new BooleanOption("entry.tooltipscroll.canscroll", "entrytooltip.tooltipscroll.canscroll", true));
+    public final BooleanOption useWASD = option("useWASD", new BooleanOption("entry.tooltipscroll.usewasd", "entrytooltip.tooltipscroll.usewasd", false));
+    public final BooleanOption startOnTop = option("startOnTop", new BooleanOption("entry.tooltipscroll.startontop", "entrytooltip.tooltipscroll.startontop", false));
+    public final BooleanOption resetOnUnlock = option("resetOnUnlock", new BooleanOption("entry.tooltipscroll.resetonunlock", "entrytooltip.tooltipscroll.resetonunlock", true));
+    public final BooleanOption useLShift = option("useLShift", new BooleanOption("entry.tooltipscroll.uselshift", "entrytooltip.tooltipscroll.uselshift", true));
+    public final BooleanOption invertXScroll = option("invertXScroll", new BooleanOption("entry.tooltipscroll.invertxscroll", "entrytooltip.tooltipscroll.invertxscroll", false));
+    public final BooleanOption invertYScroll = option("invertYScroll", new BooleanOption("entry.tooltipscroll.invertyscroll", "entrytooltip.tooltipscroll.invertyscroll", false));
+    public final BooleanOption matrixCompatibilityMode = option("matrixCompatibilityMode", new BooleanOption("entry.tooltipscroll.matrix_compatibility", "entrytooltip.tooltipscroll.matrix_compatibility", false));
+
+    public final IntegerOption scrollSpeed = option("scrollSpeed", new IntegerOption("entry.tooltipscroll.scrollspeed", "entrytooltip.tooltipscroll.scrollspeed", 10, IntegerValidators.min(1)));
+    public final IntegerOption keyboardScrollSpeed = option("keyboardScrollSpeed", new IntegerOption("entry.tooltipscroll.scrollspeedkeys", "entrytooltip.tooltipscroll.scrollspeedkeys", 5, IntegerValidators.min(1)));
+    public final DoubleOption scrollSmoothness = option("scrollSmoothness", new DoubleOption("entry.tooltipscroll.smoothness", "entrytooltip.tooltipscroll.smoothness", 0.25, value -> value >= 0.05 && value <= 1.0));
 
     private OSLTooltipConfig() {}
+
+    private <O extends Option> O option(String jsonKey, O option) {
+        jsonKeys.put(option, jsonKey);
+        return option;
+    }
+
+    public String getJsonKey(Option option) {
+        return jsonKeys.get(option);
+    }
 
     @Override
     public String getNamespace() {
@@ -45,7 +59,7 @@ public class OSLTooltipConfig extends BaseConfig {
 
     @Override
     public String getName() {
-        return "title.tooltipscroll.config";
+        return "tooltipscroll";
     }
 
     @Override
@@ -75,10 +89,10 @@ public class OSLTooltipConfig extends BaseConfig {
 
     @Override
     public void init() {
-        registerOptions("general",
+        registerOptions("category.tooltipscroll.general",
             canScroll, useWASD, startOnTop, resetOnUnlock, useLShift,
-            invertXScroll, invertYScroll, matrixCompatibilityMode,
-            scrollSpeed, keyboardScrollSpeed, scrollSmoothness
+            invertXScroll, invertYScroll,
+            scrollSpeed, keyboardScrollSpeed, scrollSmoothness, matrixCompatibilityMode
         );
     }
 }
