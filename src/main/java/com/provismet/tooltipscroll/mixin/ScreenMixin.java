@@ -39,12 +39,12 @@ public abstract class ScreenMixin {
             @Local(ordinal = 3) LocalIntRef effectiveX,
             @Local(ordinal = 4) LocalIntRef effectiveY
     ) {
-        if (Options.matrixMode) return;
+        if (Options.matrixMode()) return;
 
         effectiveX.set(effectiveX.get() + ScrollTracker.getXOffset());
         effectiveY.set(effectiveY.get() + ScrollTracker.getYOffset());
 
-        if (Options.startOnTop && !ScrollTracker.hasMoved()) {
+        if (Options.startOnTop() && !ScrollTracker.hasMoved()) {
             int originalY = effectiveY.get();
             if (effectiveY.get() < 4) {
                 effectiveY.set(4);
@@ -55,7 +55,7 @@ public abstract class ScreenMixin {
 
     @Inject(method = "renderTooltip(Ljava/util/List;II)V", at = @At("HEAD"))
     private void tooltipscroll$headMatrices(List<String> text, int mouseX, int mouseY, CallbackInfo ci) {
-        if (!Options.matrixMode) return;
+        if (!Options.matrixMode()) return;
 
         GlStateManager.pushMatrix();
         GlStateManager.translated(ScrollTracker.getXOffset(), ScrollTracker.getYOffset(), 0.0F);
@@ -63,7 +63,7 @@ public abstract class ScreenMixin {
 
     @Inject(method = "renderTooltip(Ljava/util/List;II)V", at = @At("RETURN"))
     private void tooltipscroll$tailMatrices(List<String> text, int mouseX, int mouseY, CallbackInfo ci) {
-        if (!Options.matrixMode) return;
+        if (!Options.matrixMode()) return;
 
         GlStateManager.popMatrix();
     }

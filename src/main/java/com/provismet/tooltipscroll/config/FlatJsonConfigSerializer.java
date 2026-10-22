@@ -20,7 +20,7 @@ public class FlatJsonConfigSerializer implements ConfigSerializer<JsonFile> {
 
             for (OptionGroup group : config.getGroups()) {
                 for (Option option : group.getOptions()) {
-                    json.writeName(option.getName());
+                    json.writeName(((OSLTooltipConfig) config).getJsonKey(option));
                     serializeOption(option, settings, json);
                 }
             }
@@ -54,8 +54,9 @@ public class FlatJsonConfigSerializer implements ConfigSerializer<JsonFile> {
 
     private static Option findOption(Config config, String name) {
         for (OptionGroup group : config.getGroups()) {
-            Option option = group.getOption(name);
-            if (option != null) return option;
+            for (Option option : group.getOptions()) {
+                if (((OSLTooltipConfig) config).getJsonKey(option).equals(name)) return option;
+            }
         }
         return null;
     }

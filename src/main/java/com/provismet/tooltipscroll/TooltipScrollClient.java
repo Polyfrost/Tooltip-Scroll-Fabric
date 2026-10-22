@@ -1,9 +1,11 @@
 package com.provismet.tooltipscroll;
 
+import com.provismet.tooltipscroll.config.OSLTooltipConfig;
+import net.ornithemc.osl.config.api.ConfigManager;
 import net.ornithemc.osl.keybinds.api.KeybindEvents;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import net.fabricmc.api.ClientModInitializer;
+import net.ornithemc.osl.entrypoints.api.client.ClientModInitializer;
 
 public class TooltipScrollClient implements ClientModInitializer {
 
@@ -20,8 +22,8 @@ public class TooltipScrollClient implements ClientModInitializer {
     }
 
     @Override
-    public void onInitializeClient () {
-        Options.readJSON();
+    public void initClient() {
+        ConfigManager.register(OSLTooltipConfig.INSTANCE);
         KeybindEvents.REGISTER_KEYBINDS.register(TooltipScrollKeybinds::init);
     }
 }
