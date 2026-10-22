@@ -6,9 +6,11 @@
   "mixins": [
   ],
   "client": [
-    "ScreenMixin",
-    "MouseMixin",
-    "MinecraftMixin"
+    "ChatScreenMixin",
+    "CreativeInventoryScreenMixin",
+    "ListWidgetMixin",
+    "MinecraftMixin",
+    "ScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

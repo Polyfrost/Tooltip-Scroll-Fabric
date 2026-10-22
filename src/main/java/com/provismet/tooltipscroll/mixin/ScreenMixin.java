@@ -1,5 +1,7 @@
 package com.provismet.tooltipscroll.mixin;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import com.provismet.tooltipscroll.Options;
@@ -15,6 +17,11 @@ import java.util.List;
 
 @Mixin(value = Screen.class)
 public abstract class ScreenMixin {
+
+    @WrapOperation(method = "handleInputs", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/Screen;handleMouse()V"))
+    private void tooltipscroll$scrollTooltip(Screen screen, Operation<Void> original) {
+        ScrollTracker.handleScreenMouse(() -> original.call(screen));
+    }
 
     @Inject(method = "renderTooltip(Ljava/util/List;II)V", at = @At("HEAD"))
     private void tooltipscroll$applyTracker(List<String> text, int mouseX, int mouseY, CallbackInfo ci) {
